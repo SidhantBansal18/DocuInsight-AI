@@ -1,0 +1,8 @@
+Company Name: AgenticCorp
+Year: 2024
+Location: Floating City, Tokyo
+Emergency Contact: Jane Smith (555-9999)
+Breakroom Password: 'Gemma-Magic-2024'
+Policy: Every Friday is 'No-Code Friday' and every Monday is 'Deep-Work Monday'.
+Equipment: High-end workstations and VR headsets provided.
+Planning Scenario: Three plans - Basic, Advanced, and Extreme Response Plans.

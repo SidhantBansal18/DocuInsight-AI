@@ -1,0 +1,78 @@
+import os
+from langchain_community.document_loaders import DirectoryLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_ollama import OllamaEmbeddings, ChatOllama
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+# --- CONFIGURATION ---
+MODEL = "gemma4:31b-cloud"
+KNOWLEDGE_DIR = "./knowledge_base"
+DB_PATH = "faiss_index"
+
+def build_rag_pipeline():
+    print("--- Stage 1: Loading Documents ---")
+    loader = DirectoryLoader(KNOWLEDGE_DIR, glob="**/*.txt", loader_cls=TextLoader)
+    documents = loader.load()
+    print(f"Loaded {len(documents)} documents.")
+
+    print("\n--- Stage 2: Chunking Text ---")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    chunks = text_splitter.split_documents(documents)
+    print(f"Created {len(chunks)} chunks of text.")
+
+    print("\n--- Stage 3: Creating Embeddings & Vector Store ---")
+    embeddings = OllamaEmbeddings(model=MODEL)
+    
+    # Use FAISS instead of Chroma. It's a local-first library 
+    # that doesn't have the "http-only" issues of Chroma.
+    vector_db = FAISS.from_documents(
+        documents=chunks, 
+        embedding=embeddings
+    )
+    
+    # Save the index locally
+    vector_db.save_local(DB_PATH)
+    print(f"Knowledge base indexed and saved to {DB_PATH}")
+
+    return vector_db
+
+def run_rag_query(vector_db, query):
+    llm = ChatOllama(model=MODEL)
+    
+    template = """Answer the question based only on the following context:
+    {context}
+
+    Question: {question}
+    Answer:"""
+    prompt = ChatPromptTemplate.from_template(template)
+
+    retriever = vector_db.as_retriever(search_kwargs={"k": 3})
+
+    rag_chain = (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | prompt 
+        | llm 
+        | StrOutputParser()
+    )
+    
+    print(f"\nQuery: {query}")
+    return rag_chain.invoke(query)
+
+if __name__ == "__main__":
+    # 1. Setup the "Library"
+    vector_db = build_rag_pipeline()
+
+    # 2. Test the RAG pipeline
+    test_queries = [
+        "What is the secret password to enter the breakroom?",
+        "Where is the company office located?",
+        "What happens on Fridays at AgenticCorp?",
+        "Who founded the company and when?"
+    ]
+
+    for q in test_queries:
+        ans = run_rag_query(vector_db, q)
+        print(f"Agent: {ans}")
