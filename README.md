@@ -1,10 +1,10 @@
-# Conversational RAG Agent
+# DocuInsight-AI
 
-A sophisticated Retrieval-Augmented Generation (RAG) system built to index local documents and provide context-aware answers using a local LLM via Ollama.
+A sophisticated Retrieval-Augmented Generation (RAG) system built to index local documents and provide context-aware analysis using a local LLM via Ollama.
 
 ## 🚀 Features
-- **Local-First Architecture**: Uses FAISS for vector storage and Ollama for embeddings and LLM generation, ensuring data privacy.
-- **Document Ingestion**: Supports PDF and Text files via LangChain's directory loaders.
+- **Local-First Architecture**: Uses FAISS for vector storage and Ollama for embeddings and LLM generation, ensuring complete data privacy.
+- **Document Intelligence**: Supports PDF and Text files via LangChain's directory loaders, turning static files into an interactive knowledge base.
 - **Optimized Chunking**: Implements `RecursiveCharacterTextSplitter` with tuned chunk sizes and overlaps for high-fidelity retrieval.
 - **Comparative Analysis**: Capable of identifying differences between multiple documents (e.g., comparing policy changes across different years).
 - **Pure Python Implementation**: Custom wrappers for Ollama to ensure compatibility across different Python versions (tested on Python 3.14).
@@ -29,8 +29,8 @@ A sophisticated Retrieval-Augmented Generation (RAG) system built to index local
 ## ⚙️ Setup & Usage
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/[your-username]/rag-project.git
-   cd rag-project
+   git clone https://github.com/SidhantBansal18/DocuInsight-AI.git
+   cd DocuInsight-AI
    ```
 2. **Add Knowledge**:
    Place your `.pdf` or `.txt` files in the `knowledge_base/` directory.
