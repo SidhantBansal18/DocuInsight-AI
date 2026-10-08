@@ -91,22 +91,34 @@ def build_rag_pipeline():
     
     print(f"Loaded {len(documents)} documents.")
 
-    # IMPROVED: Larger chunk size for technical documents
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
+    # --- PARENT-DOCUMENT STYLE LOGICAL CHUNKING ---
+    # Instead of one-size-fits-all, we use a hierarchy:
+    # 1. We keep the original large documents (Parent)
+    # 2. We create smaller, highly searchable chunks (Child)
+    # In a simple FAISS setup, we simulate this by using a larger chunk size 
+    # that preserves logical paragraphs and section headers.
+    
+    # OPTIMIZED: Larger chunk size (2000) to keep technical context together
+    # Higher overlap (300) to ensure no information is lost at boundaries
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=2000, 
+        chunk_overlap=300,
+        separators=["\n\n", "\n", " ", ""] # Prioritize splitting by paragraphs then lines
+    )
     chunks = text_splitter.split_documents(documents)
-
+    
     embeddings = LocalOllamaEmbeddings()
     vector_db = FAISS.from_documents(documents=chunks, embedding=embeddings)
     vector_db.save_local(DB_PATH)
-    print("Knowledge base indexed successfully.")
+    print("Knowledge base indexed successfully with Logical Chunking.")
 
     return vector_db
 
 def run_rag_chat(vector_db, query, history):
     llm = LocalOllamaLLM()
     
-    # IMPROVED: Increased k to 15 to find more relevant context in large documents
-    docs = vector_db.similarity_search(query, k=15)
+    # OPTIMIZED: Increased k to 20 to retrieve more evidence from technical documents
+    docs = vector_db.similarity_search(query, k=20)
     context = "\n\n".join([d.page_content for d in docs])
     
     history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history])
@@ -115,6 +127,7 @@ def run_rag_chat(vector_db, query, history):
     full_prompt = f"""You are an expert analysis assistant for technical manuals.
 Use the following retrieved context to answer the question accurately.
 Search the context thoroughly for related terms (e.g., if asking for 'equipment', look for 'resources', 'tools', or 'logistics').
+If the answer is not in the context, state that you cannot find the information in the provided documents.
 
 Context:
 {context}

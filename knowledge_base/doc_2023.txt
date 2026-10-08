@@ -1,8 +1,0 @@
-Company Name: AgenticCorp
-Year: 2023
-Location: Tokyo, Japan
-Emergency Contact: John Doe (555-0101)
-Breakroom Password: 'Llama-Magic-2023'
-Policy: Every Friday is 'No-Code Friday'.
-Equipment: Standard laptops and monitors provided.
-Planning Scenario: Only one plan - The Basic Response Plan.
